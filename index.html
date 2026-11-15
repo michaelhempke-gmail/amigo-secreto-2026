@@ -6,46 +6,86 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Amigo Secreto 2026</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(145deg, #103d32, #1b6b51);
+  
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #103d32;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+/* Remove a aparência de cartão branco */
+.card {
+  width: 100%;
+  max-width: 650px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  text-align: center;
+}
+
+/* Aproveita toda a largura disponível */
+#resultado {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Imagem principal */
+.foto,
+#foto,
+#cartao {
+  display: block;
+  width: 100%;
+  max-width: 650px;
+  height: auto;
+  margin: 0 auto;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  object-fit: contain;
+}
+
+/* Esconde textos que duplicam os da arte */
+#resultado > p,
+#resultado > .nome,
+#resultado > #nome {
+  display: none;
+}
+
+/* Animação suave */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
   }
-  .card {
-    background: #fffdf8;
-    width: 100%;
-    max-width: 420px;
-    padding: 35px 25px;
-    border-radius: 24px;
-    text-align: center;
-    box-shadow: 0 15px 45px #0003;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
-  .emoji { font-size: 55px; }
-  h1 { color: #174c39; }
-  p { color: #666; line-height: 1.6; }
-  .foto {
-    width: 190px;
-    height: 190px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 5px solid #e8c66a;
-    margin: 15px auto;
-    display: block;
-  }
-  .nome {
-    font-size: 32px;
-    font-weight: bold;
-    color: #174c39;
-    margin: 15px 0;
-  }
-  #resultado { display: none; }
-  #erro { display: none; color: #a32626; }
+}
+
+#resultado {
+  animation: aparecer 0.7s ease;
+}
+
 </style>
 </head>
 <body>
