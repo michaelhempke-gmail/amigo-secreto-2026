@@ -1,21 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amigo Secreto 2026</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(145deg, #103d32, #1b6b51);
+  }
+  .card {
+    background: #fffdf8;
+    width: 100%;
+    max-width: 420px;
+    padding: 35px 25px;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 15px 45px #0003;
+  }
+  .emoji { font-size: 55px; }
+  h1 { color: #174c39; }
+  p { color: #666; line-height: 1.6; }
+  .foto {
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #e8c66a;
+    margin: 15px auto;
+    display: block;
+  }
+  .nome {
+    font-size: 32px;
+    font-weight: bold;
+    color: #174c39;
+    margin: 15px 0;
+  }
+  #resultado { display: none; }
+  #erro { display: none; color: #a32626; }
+</style>
+</head>
 <body>
-  <div class="card">
-    <h1>🎁 Amigo Secreto</h1>
-    <p>Seu sorteio está pronto!</p>
-    <button onclick="revelar()">Revelar meu amigo secreto</button>
-    <h2 id="resultado"></h2>
+<div class="card">
+  <div class="emoji">🎄🎁</div>
+  <h1>Amigo Secreto 2026</h1>
+
+  <p id="carregando">Revelando seu amigo secreto...</p>
+
+  <div id="resultado">
+    <p>🎉 Você tirou:</p>
+    <img id="foto" class="foto" alt="Foto do amigo secreto">
+    <div id="nome" class="nome"></div>
+    <p>🤫 Guarde segredo!</p>
+    <p>Prepare um presente especial! 🎁</p>
   </div>
 
-  <script>
-    function revelar() {
-      const nome = new URLSearchParams(
-        location.hash.slice(1)
-      ).get("teste");
+  <p id="erro">Link inválido ou resultado indisponível.</p>
+</div>
 
-      document.getElementById("resultado").textContent =
-        nome ? "🎉 Você tirou: " + nome :
-        "Nenhum resultado encontrado.";
+<script>
+/*
+Formato do fragmento:
+#v1.CHAVE.IV.CIPHERTEXT
+
+CHAVE: 32 bytes aleatórios
+IV: 12 bytes aleatórios
+CIPHERTEXT: AES-256-GCM com tag de autenticação
+
+Todos os campos em Base64URL, sem padding.
+
+Texto original criptografado:
+{"nome":"Marcela","foto":"marcela.jpg"}
+*/
+
+function base64urlBytes(valor) {
+  if (!/^[A-Za-z0-9_-]+$/.test(valor)) {
+    throw new Error("Codificação inválida");
+  }
+  const base64 = valor.replace(/-/g, "+").replace(/_/g, "/");
+  const binario = atob(base64.padEnd(
+    Math.ceil(base64.length / 4) * 4, "="
+  ));
+  return Uint8Array.from(binario, c => c.charCodeAt(0));
+}
+
+async function revelar() {
+  try {
+    const fragmento = location.hash.slice(1);
+    const partes = fragmento.split(".");
+
+    if (partes.length !== 4 || partes[0] !== "v1") {
+      throw new Error("Formato inválido");
     }
-  </script>
+
+    const chave = base64urlBytes(partes[1]);
+    const iv = base64urlBytes(partes[2]);
+    const cifrado = base64urlBytes(partes[3]);
+
+    if (chave.length !== 32 || iv.length !== 12 ||
+        cifrado.length < 17) {
+      throw new Error("Dados inválidos");
+    }
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw", chave, "AES-GCM", false, ["decrypt"]
+    );
+
+    const texto = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv, tagLength: 128 },
+      cryptoKey,
+      cifrado
+    );
+
+    const dados = JSON.parse(
+      new TextDecoder().decode(texto)
+    );
+
+    if (typeof dados.nome !== "string" ||
+        !/^[a-z0-9_-]+\.jpg$/.test(dados.foto)) {
+      throw new Error("Resultado inválido");
+    }
+
+    document.getElementById("nome").textContent = dados.nome;
+
+    const foto = document.getElementById("foto");
+    foto.src = "fotos/" + dados.foto;
+    foto.onerror = () => {
+      foto.style.display = "none";
+    };
+
+    document.getElementById("carregando").style.display = "none";
+    document.getElementById("resultado").style.display = "block";
+
+  } catch (e) {
+    document.getElementById("carregando").style.display = "none";
+    document.getElementById("erro").style.display = "block";
+  }
+}
+
+revelar();
+</script>
 </body>
 </html>
+
