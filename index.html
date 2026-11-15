@@ -1,0 +1,21 @@
+<body>
+  <div class="card">
+    <h1>🎁 Amigo Secreto</h1>
+    <p>Seu sorteio está pronto!</p>
+    <button onclick="revelar()">Revelar meu amigo secreto</button>
+    <h2 id="resultado"></h2>
+  </div>
+
+  <script>
+    function revelar() {
+      const nome = new URLSearchParams(
+        location.hash.slice(1)
+      ).get("teste");
+
+      document.getElementById("resultado").textContent =
+        nome ? "🎉 Você tirou: " + nome :
+        "Nenhum resultado encontrado.";
+    }
+  </script>
+</body>
+</html>
